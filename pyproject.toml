@@ -1,0 +1,27 @@
+[project]
+name = "chess-improvement"
+version = "0.1.0"
+description = "Analyse chess.com game history and build an improvement plan"
+authors = [
+    { name = "Matt", email = "2432182+Kali89@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "chess>=1.11.2",
+    "matplotlib>=3.11.2",
+    "numpy>=2.5.4",
+    "pandas>=3.1.1",
+    "pyarrow>=26.0.1",
+    "requests>=2.34.2",
+    "scipy>=1.18.1",
+    "tabulate>=0.10.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.13.7,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+]
