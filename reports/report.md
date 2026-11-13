@@ -1,5 +1,7 @@
 # Blitz improvement report: MatthewSharpe99
 
+> **Follow-up (2026-11-13):** why I'm at a peak, a sharper diagnosis (middlegame pawn grabs), and a training regime with tools: [why_better_and_training.md](why_better_and_training.md).
+
 *Generated 2026-11-12 from 13,747 rated blitz games (Feb 2021 to Nov 2026). Stockfish 19 analysed the most recent 600 of them (300 at 3+0 and 300 at 5+0, 20,495 of my moves) at depth 16.*
 
 ## TL;DR
@@ -80,7 +82,7 @@
 |---|---|
 | **Finding my own tactics** | I miss fewer winning shots than my opponents: **−40 Elo vs peers** (CI −66 to −14). Missed tactics are 13% of my lost points against 20% of theirs. |
 | **Quiet / positional play** | "Positional/other" errors: −18 Elo vs peers (CI −36 to −1). |
-| **Openings overall** | Opening-phase errors are on par with peers (−2 Elo, CI −12 to +9) and only 12% of my lost points. **Italian Game as White is a weapon**: +0.047 vs expectation (n = 1,225), and the Knight Attack / Fried Liver lines score **+0.19** (n = 192). The Scandinavian (my main defence, n = 2,837) is neutral and fine. |
+| **Openings overall** | Opening-phase errors are on par with peers (−2 Elo, CI −12 to +9) and only 12% of my lost points. **Italian Game as White is a weapon**: +0.047 vs expectation (n = 1,225), and the Knight Attack / Fried Liver lines score **+0.19** (n = 192). *(Correction, 2026-11-13: these figures pool all my games since 2021. I stopped playing the Scandinavian in early 2025; since then my defence to 1.e4 has been 1…e5, which scores −0.027 vs expectation (n = 938, CI just touching zero). See [why_better_and_training.md](why_better_and_training.md).)* |
 | **Endgames** | Error rate in endgames matches my opponents' (5.1 vs 5.0 per 100 moves; +2 Elo, CI −12 to +15), with no weak endgame type among rook, minor-piece, pawn or queen endings. Endgame theory isn't where my points go. |
 | **Emotional control** | No tilt: after a loss I score −0.009 against expectation (CI −0.026 to +0.008, n = 3,342), and loss streaks of 2–3 make no difference. No time-of-day effect either. |
 | **Colour balance** | No meaningful White/Black gap. |

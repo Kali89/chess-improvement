@@ -22,6 +22,7 @@ import pandas as pd
 from . import download, engine, errors, parse
 from .config import DATA_DIR
 from .descriptive import TIME_TROUBLE_FRAC, load as load_games
+from .drills import is_pawn_grab
 from .stats import residual_summary, wilson_ci
 
 BASELINE_N = 600
@@ -54,7 +55,14 @@ def engine_metrics(p: pd.DataFrame) -> dict[str, str]:
     me, opp = p[p["is_me"]], p[~p["is_me"]]
     mid = me[me["phase"] == "middlegame"]
     calm = me[me["clock_frac"] >= 0.25]
+    grab_mask = pd.Series([is_pawn_grab(f, u) for f, u in zip(me["fen"], me["played_uci"])],
+                          index=me.index, dtype=bool)  # a Series, so an empty window still selects rows
+    grabs = me[grab_mask]
+    mid_grabs = grabs[grabs["phase"] == "middlegame"]
     return {
+        "middlegame pawn grabs that allowed a tactic (%)":
+            _rate(int((mid_grabs["error_kind"] == "missed threat").sum()), len(mid_grabs)),
+        "missed threats per game": f"{(me['error_kind'] == 'missed threat').sum() / max(me['url'].nunique(), 1):.2f}",
         "blunders per 100 moves": _rate(int((me["severity"] == "blunder").sum()), len(me)),
         "hung pieces + allowed tactics per 100 moves":
             _rate(int(me["theme"].isin(["hung piece", "allowed tactic", "allowed mate"]).sum()), len(me)),

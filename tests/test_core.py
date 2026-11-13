@@ -43,3 +43,12 @@ def test_pre_game_ratings_undo_post_game_change():
     out = _pre_game_ratings(df)
     assert out["my_rating"].tolist() == [1500, 1508, 1500]
     assert out["opp_rating"].tolist() == [1500, 1502, 1498]
+
+
+def test_is_pawn_grab():
+    from chess_improvement.drills import is_pawn_grab
+    # Black queen on b6 takes the b2 pawn: a pawn grab.
+    fen = "r1b2rk1/1p1n1pp1/1qpp1n1p/p1b1p3/4P3/P1NPBN1P/BPP2PP1/R2QR1K1 b - - 5 11"
+    assert is_pawn_grab(fen, "b6b2")
+    # A quiet bishop move is not.
+    assert not is_pawn_grab(fen, "c8d7")

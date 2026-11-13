@@ -1,7 +1,7 @@
 # chess-improvement
 
 Analysis of my chess.com blitz history (3+0 and 5+0), producing an evidence-based training plan.
-The write-up is in [`reports/report.md`](reports/report.md).
+The write-up is in [`reports/report.md`](reports/report.md); the follow-up on why I'm at a peak, plus the training regime, is in [`reports/why_better_and_training.md`](reports/why_better_and_training.md).
 
 ## Pipeline
 
@@ -15,6 +15,18 @@ The write-up is in [`reports/report.md`](reports/report.md).
 | 6. engine breakdowns | `engine_analysis.py` | `reports/phase3/` | n/a |
 | 7. verify study positions | `instructive.py` | `reports/phase3/instructive.md` | yes (depth-20 cache) |
 | progress check | `progress.py --since YYYY-MM-DD` | printed table | uses the caches above |
+| then vs now | `then_vs_now.py` (needs `engine --between 2025-06-01 2026-04-01 --per-control 150`) | `reports/then_vs_now.md` | |
+| threat profile | `threat_profile.py` | `reports/threat_profile.md` | |
+| me-vs-opp CIs | `excess_ci.py` | `reports/phase3/excess_ci.md` | |
+
+## Training tools
+
+```bash
+uv run python -m chess_improvement.review          # after each sitting: engine-check new games, scorecard, add drills
+uv run python -m chess_improvement.drill           # spaced-repetition drill on my own mistakes (--pawn-grabs, --stats)
+uv run python -m chess_improvement.drills --build  # (re)build the drill deck from all analysed games
+```
+The deck and review log live in `data/drills/` (not committed).
 
 ```bash
 uv sync

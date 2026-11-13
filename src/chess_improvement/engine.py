@@ -172,19 +172,29 @@ def analyse_game(row: dict, depth: int = DEPTH) -> int:
     return len(rows)
 
 
-def select_games(per_control: int | None = None, since: str | None = None) -> pd.DataFrame:
-    """Rated 3+0 / 5+0 games: either the most recent `per_control` per control, or all since a date."""
+def select_games(per_control: int | None = None, since: str | None = None,
+                 between: tuple[str, str] | None = None, seed: int = 0) -> pd.DataFrame:
+    """Rated 3+0 / 5+0 games to analyse. Three ways to choose them:
+      - since:   every game from this date onwards
+      - between: a random sample of `per_control` games per control from [start, end)
+      - default: the most recent `per_control` games per control
+    """
     df = pd.read_parquet(GAMES_TABLE)
     df = df[df["rated"] & df["time_control"].isin(CONTROLS) & (df["n_plies"] >= 10)]
     if since is not None:
         return df[df["start_time"] >= pd.Timestamp(since, tz="UTC")]
+    if between is not None:
+        lo, hi = (pd.Timestamp(x, tz="UTC") for x in between)
+        w = df[(df["start_time"] >= lo) & (df["start_time"] < hi)]
+        return pd.concat([g.sample(min(per_control, len(g)), random_state=seed)
+                          for _, g in w.groupby("time_control")])
     return df.sort_values("start_time").groupby("time_control").tail(per_control)
 
 
 def run(per_control: int | None = 150, depth: int = DEPTH, workers: int = 8,
-        since: str | None = None) -> None:
+        since: str | None = None, between: tuple[str, str] | None = None) -> None:
     cache_dir(depth).mkdir(parents=True, exist_ok=True)
-    games = select_games(per_control, since)
+    games = select_games(per_control, since, between)
     cols = ["url", "pgn", "colour", "time_control", "base_s", "increment_s"]
     todo = [r for r in games[cols].to_dict("records")
             if not (cache_dir(depth) / f"{r['url'].rsplit('/', 1)[-1]}.parquet").exists()]
@@ -206,5 +216,7 @@ if __name__ == "__main__":
     ap.add_argument("--depth", type=int, default=DEPTH)
     ap.add_argument("--workers", type=int, default=min(8, os.cpu_count() or 4))
     ap.add_argument("--since", help="analyse all games since this date (YYYY-MM-DD) instead")
+    ap.add_argument("--between", nargs=2, metavar=("START", "END"),
+                    help="random sample of --per-control games per control from [START, END)")
     a = ap.parse_args()
-    run(a.per_control, a.depth, a.workers, a.since)
+    run(a.per_control, a.depth, a.workers, a.since, tuple(a.between) if a.between else None)
