@@ -23,7 +23,7 @@ The write-up is in [`reports/report.md`](reports/report.md); the follow-up on wh
 
 ```bash
 uv run python -m chess_improvement.review          # after each sitting: engine-check new games, scorecard, add drills
-uv run python -m chess_improvement.drill           # spaced-repetition drill on my own mistakes (--pawn-grabs, --stats)
+uv run python -m chess_improvement.drill           # spaced-repetition drill on my own mistakes, in the browser (--pawn-grabs, --stats, --terminal)
 uv run python -m chess_improvement.drills --build  # (re)build the drill deck from all analysed games
 ```
 The deck and review log live in `data/drills/` (not committed).

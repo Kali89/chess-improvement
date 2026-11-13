@@ -9,7 +9,8 @@ The habit being trained: before choosing a move, say what the opponent's last mo
 prompt asks for that first. Nothing checks it, but saying it is the point.
 
 Run:
-    uv run python -m chess_improvement.drill            # today's due drills (up to 8)
+    uv run python -m chess_improvement.drill            # today's due drills (up to 8), in the browser
+    uv run python -m chess_improvement.drill --terminal # text board instead
     uv run python -m chess_improvement.drill --n 15
     uv run python -m chess_improvement.drill --stats
 """
@@ -23,7 +24,7 @@ import chess
 import chess.engine
 import pandas as pd
 
-from .drills import BOX_DAYS, THREAT, load_deck, save_deck
+from .drills import THREAT, load_deck
 from .engine import STOCKFISH
 
 ACCEPT_WITHIN = 0.07
@@ -60,7 +61,7 @@ def ask_move(board: chess.Board) -> chess.Move | None:
 
 
 def run_session(deck: pd.DataFrame, idx: list[int], engine: chess.engine.SimpleEngine) -> None:
-    today = dt.date.today()
+    from .drill_web import record
     passed = 0
     for k, i in enumerate(idx, 1):
         d = deck.loc[i]
@@ -83,12 +84,7 @@ def run_session(deck: pd.DataFrame, idx: list[int], engine: chess.engine.SimpleE
         kind = "you missed their threat" if d["theme"] in THREAT else "you missed a chance"
         print(f"  In the game you played {d['played_san']} ({d['theme']}: {kind}; win chance fell to {d['wp_after']:.0%})")
         print(f"  Board: https://lichess.org/analysis/{d['fen'].replace(' ', '_')}   Game: {d['url']}")
-        box = int(d["box"])
-        box = min(box + 1, 5) if ok else 1
-        deck.loc[i, ["box", "due"]] = [box, (today + dt.timedelta(days=BOX_DAYS[box])).isoformat()]
-        deck.loc[i, "attempts"] = int(d["attempts"]) + 1
-        deck.loc[i, "passes"] = int(d["passes"]) + int(ok)
-        save_deck(deck)  # save after every drill so quitting midway loses nothing
+        record(deck, i, ok)  # saves after every drill so quitting midway loses nothing
         passed += ok
     print(f"\nSession: {passed}/{len(idx)} passed.")
 
@@ -111,6 +107,7 @@ def main() -> None:
     ap.add_argument("--pawn-grabs", action="store_true", help="only positions where I grabbed a pawn and got punished")
     ap.add_argument("--all", action="store_true", help="ignore due dates")
     ap.add_argument("--stats", action="store_true")
+    ap.add_argument("--terminal", action="store_true", help="old text board in the terminal instead of the browser")
     a = ap.parse_args()
     deck = load_deck()
     if deck.empty:
@@ -134,7 +131,11 @@ def main() -> None:
     engine = chess.engine.SimpleEngine.popen_uci(STOCKFISH)
     engine.configure({"Threads": 4, "Hash": 128})
     try:
-        run_session(deck, idx, engine)
+        if a.terminal:
+            run_session(deck, idx, engine)
+        else:
+            from .drill_web import serve
+            serve(deck, idx, engine)
     except (KeyboardInterrupt, EOFError):
         print("\nStopped; progress saved.")
     finally:
